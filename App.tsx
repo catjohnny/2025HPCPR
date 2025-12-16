@@ -275,13 +275,14 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="space-y-8">
               <p className="text-slate-600 text-lg">曼谷 Siriraj 醫院要求所有醫護人員配戴 **Body-Worn Camera**。這不僅是法律保障，更是教育工具。透過將影像與生理數據（如胸部阻抗、EtCO2）同步對比，人員能清晰發現自己不自覺的「疲勞期」。</p>
-              <Card title="數據指標看板">
+              {/* Fix: Changed undefined 'Card' component to 'DetailCard' */}
+              <DetailCard title="數據指標看板">
                 <ul className="space-y-4">
                   <li className="flex justify-between border-b pb-2"><span>平均 CCF</span> <span className="text-blue-600 font-bold">92%</span></li>
                   <li className="flex justify-between border-b pb-2"><span>換手停頓平均</span> <span className="text-blue-600 font-bold">2.8 秒</span></li>
                   <li className="flex justify-between border-b pb-2"><span>ROSC 後入住 ICU 率</span> <span className="text-blue-600 font-bold">提升 15%</span></li>
                 </ul>
-              </Card>
+              </DetailCard>
             </div>
             <DetailCard title="獎勵與文化" icon={<Award className="w-6 h-6 text-red-600" />}>
               <p>為了避免「檢討文化」造成人員壓力，Siriraj 設立了：</p>
@@ -383,14 +384,14 @@ export default function App() {
                 <div className="p-4 bg-white/10 rounded-2xl h-fit"><Thermometer className="text-orange-400" /></div>
                 <div>
                   <h4 className="text-xl font-bold mb-3 underline decoration-orange-400 underline-offset-8">目標體溫管理 (TTM)</h4>
-                  <p className="text-slate-300">不再盲目追求「低溫」，而是「控溫」。核心目標是 **防止發燒 (&gt; 37.7°C)** 至少持續 72 小時。對於意識不清的患者，控溫於 32-36°C 仍是可選方案。</p>
+                  <p className="text-slate-300">不再盲目追求「低溫」，而是「控溫」。核心目標是 **防止發燒 (> 37.7°C)** 至少持續 72 小時。對於意識不清的患者，控溫於 32-36°C 仍是可選方案。</p>
                 </div>
               </div>
               <div className="flex gap-6">
                 <div className="p-4 bg-white/10 rounded-2xl h-fit"><Activity className="text-green-400" /></div>
                 <div>
                   <h4 className="text-xl font-bold mb-3 underline decoration-green-400 underline-offset-8">血壓管理變革</h4>
-                  <p className="text-slate-300">捨棄 SBP 90 的舊思維。2025 指南建議 **MAP (平均動脈壓) &gt; 65 mmHg** 作為最低標準。為優化腦灌流，許多中心現在設定 MAP 為 80-100 mmHg。</p>
+                  <p className="text-slate-300">捨棄 SBP 90 的舊思維。2025 指南建議 **MAP (平均動脈壓) > 65 mmHg** 作為最低標準。為優化腦灌流，許多中心現在設定 MAP 為 80-100 mmHg。</p>
                 </div>
               </div>
             </div>
@@ -414,7 +415,8 @@ export default function App() {
             icon={<BookOpen className="w-8 h-8" />} 
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <DetailCard title="BLS TOR 規則" color="amber">
+            {/* Fix: Removed unsupported 'color' prop from 'DetailCard' */}
+            <DetailCard title="BLS TOR 規則">
               <p>如果滿足以下三點，院外可考慮終止急救：</p>
               <ul className="list-decimal list-inside space-y-2 text-sm mt-4">
                 <li>沒有旁觀者目擊 (Unwitnessed)。</li>
