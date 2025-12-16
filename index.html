@@ -3,18 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泰國曼谷 HP-CPR 與 2025 AHA 指南權威百科</title>
+    <title>2025 泰國曼谷 HP-CPR 與 AHA 指南權威百科全書</title>
+    <!-- CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; scroll-behavior: smooth; }
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .text-gradient { background: linear-gradient(135deg, #1e40af 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .section-padding { padding-top: 5rem; padding-bottom: 5rem; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+        .section-padding { padding-top: 8rem; padding-bottom: 8rem; }
+        .medical-grid { background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 30px 30px; }
+        .text-glow { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .gradient-border { border-image: linear-gradient(to right, #3b82f6, #ef4444) 1; }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .animate-heart { animation: pulse-red 1.5s infinite; }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-900 medical-grid">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Helper Icons Components ---
+        const Icon = ({ name, className = "w-6 h-6" }) => {
+            useEffect(() => { lucide.createIcons(); }, []);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        // --- UI Components ---
+        const Badge = ({ children, color = "blue" }) => {
+            const colors = {
+                red: "bg-red-50 text-red-700 border-red-100",
+                green: "bg-green-50 text-green-700 border-green-100",
+                blue: "bg-blue-50 text-blue-700 border-blue-100",
+                amber: "bg-amber-50 text-amber-700 border-amber-100"
+            };
+            return (
+                <span className={`inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-6 border ${colors[color]}`}>
+                    {children}
+                </span>
+            );
+        };
+
+        const SectionHeader = ({ title, subtitle, icon, id, dark = false }) => (
+            <div id={id} className="mb-20 scroll-mt-32">
+                <div className="flex items-center gap-6 mb-8">
+                    <div className={`p-5 rounded-3xl shadow-2xl ${dark ? 'bg-white text-blue-900' : 'bg-blue-600 text-white'}`}>
+                        <Icon name={icon} className="w-10 h-10" />
+                    </div>
+                    <h2 className={`text-4xl md:text-6xl font-black tracking-tighter ${dark ? 'text-white' : 'text-slate-900'}`}>{title}</h2>
+                </div>
+                {subtitle && <p className={`text-xl md:text-2xl leading-relaxed max-w-5xl border-l-8 pl-8 ${dark ? 'text-slate-300 border-blue-500' : 'text-slate-600 border-blue-600'}`}>{subtitle}</p>}
+            </div>
+        );
+
+        const DetailCard = ({ title, children, icon, highlight = false, color = "blue" }) => (
+            <div className={`p-10 rounded-[2.5rem] border transition-all duration-500 ${highlight ? 'bg-white shadow-2xl border-blue-100 ring-4 ring-blue-50' : 'bg-white/50 border-slate-200 hover:shadow-xl hover:bg-white'}`}>
+                <div className="flex items-center gap-4 mb-8">
+                    {icon && <div className={`p-3 rounded-2xl ${color === 'red' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}><Icon name={icon} /></div>}
+                    <h3 className="text-2xl font-black text-slate-800">{title}</h3>
+                </div>
+                <div className="text-slate-600 leading-loose space-y-6 text-lg">
+                    {children}
+                </div>
+            </div>
+        );
+
+        const DataPoint = ({ label, value, unit, description }) => (
+            <div className="bg-slate-900 p-8 rounded-3xl text-white">
+                <div className="text-slate-400 text-sm font-bold uppercase mb-2">{label}</div>
+                <div className="flex items-baseline gap-2 mb-4">
+                    <span className="text-5xl font-black text-blue-400">{value}</span>
+                    <span className="text-xl font-bold text-slate-500">{unit}</span>
+                </div>
+                <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
+            </div>
+        );
+
+        // --- Main App ---
+        function App() {
+            const [scrolled, setScrolled] = useState(false);
+            useEffect(() => {
+                const handle = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handle);
+                return () => window.removeEventListener('scroll', handle);
+            }, []);
+
+            const navItems = [
+                { id: 'ems-bangkok', label: '1. 曼谷 EMS 史', icon: 'map' },
+                { id: 'hp-cpr-physics', label: '2. 生理學深度', icon: 'microscope' },
+                { id: 'pit-crew-protocol', label: '3. 團隊分工', icon: 'users' },
+                { id: 'cqi-video', label: '4. 品質管理', icon: 'video' },
+                { id: 'ventilation', label: '5. 通氣技術', icon: 'wind' },
+                { id: 'aha-2025-main', label: '6. AHA 2025 更新', icon: 'shield-check' },
+                { id: 'pharmacology', label: '7. 藥物與路徑', icon: 'syringe' },
+                { id: 'pals-neo', label: '8. 小兒與新生兒', icon: 'baby' },
+                { id: 'ecpr-ecmo', label: '9. E-CPR 尖端', icon: 'zap' },
+                { id: 'ttm-brain', label: '10. 腦保護與 TTM', icon: 'brain' },
+                { id: 'rehab-cycle', label: '11. 第六環康復', icon: 'refresh-ccw' },
+                { id: 'ethics-death', label: '12. 倫理與 TOR', icon: 'book' },
+                { id: 'digital-ai', label: '13. 數位與 AI', icon: 'cpu' },
+                { id: 'training', label: '14. 模擬訓練', icon: 'monitor' },
+                { id: 'summary', label: '15. 結論與展望', icon: 'check-circle' }
+            ];
+
+            const scrollTo = (id) => {
+                document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'glass py-3' : 'bg-transparent py-6'}`}>
+                        <div className="max-w-[1600px] mx-auto px-10 flex justify-between items-center">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
+                                <div className="bg-red-600 p-2 rounded-xl shadow-lg animate-heart"><Icon name="heart" className="text-white w-6 h-6" /></div>
+                                <span className="text-2xl font-black tracking-tighter text-slate-900 uppercase">HP-CPR <span className="text-red-600">Bangkok</span></span>
+                            </div>
+                            <div className="hidden 2xl:flex items-center gap-2">
+                                {navItems.slice(0, 8).map(item => (
+                                    <button key={item.id} onClick={() => scrollTo(item.id)} className="px-4 py-2 text-sm font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                                        {item.label}
+                                    </button>
+                                ))}
+                                <div className="group relative">
+                                    <button className="px-4 py-2 text-sm font-bold bg-slate-100 rounded-xl flex items-center gap-2">更多章節 <Icon name="chevron-down" className="w-4 h-4" /></button>
+                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white shadow-2xl rounded-2xl border border-slate-100 hidden group-hover:block p-4">
+                                        {navItems.slice(8).map(item => (
+                                            <button key={item.id} onClick={() => scrollTo(item.id)} className="w-full text-left p-3 text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg">{item.label}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero */}
+                    <header className="relative pt-60 pb-40 overflow-hidden bg-slate-950">
+                        <div className="absolute inset-0 opacity-30">
+                            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#1e40af,transparent_70%)]"></div>
+                            <div className="absolute -bottom-40 -left-40 w-[800px] h-[800px] bg-red-900/20 rounded-full blur-[120px]"></div>
+                        </div>
+                        <div className="max-w-7xl mx-auto px-10 relative z-10">
+                            <Badge color="red">Medical Excellence 2025 Edition</Badge>
+                            <h1 className="text-7xl md:text-9xl font-black text-white mb-12 leading-[1] tracking-tight text-glow">
+                                高效能急救 <br />
+                                <span className="text-blue-500 underline decoration-blue-800">全書指南</span>
+                            </h1>
+                            <p className="text-2xl md:text-3xl text-slate-400 max-w-4xl leading-relaxed mb-16 font-light">
+                                從曼谷 Siriraj 醫院的技術革命，到 2025 年 AHA 國際最新科學基石。這是一份為急救專業人士準備的深度技術百科。
+                            </p>
+                            <div className="flex flex-wrap gap-8">
+                                <div className="flex flex-col">
+                                    <span className="text-blue-500 font-black text-4xl">2025</span>
+                                    <span className="text-slate-500 text-sm uppercase tracking-widest font-bold">Latest Guidelines</span>
+                                </div>
+                                <div className="w-px h-16 bg-slate-800"></div>
+                                <div className="flex flex-col">
+                                    <span className="text-red-500 font-black text-4xl">15+</span>
+                                    <span className="text-slate-500 text-sm uppercase tracking-widest font-bold">Core Chapters</span>
+                                </div>
+                                <div className="w-px h-16 bg-slate-800"></div>
+                                <div className="flex flex-col">
+                                    <span className="text-white font-black text-4xl">∞</span>
+                                    <span className="text-slate-500 text-sm uppercase tracking-widest font-bold">Life Saving Info</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-[1400px] mx-auto px-10">
+                        
+                        {/* 1. Bangkok EMS */}
+                        <section id="ems-bangkok" className="section-padding border-b border-slate-200">
+                            <SectionHeader 
+                                title="01. 曼谷 EMS：亞洲急救的實驗室" 
+                                subtitle="在極度塞車、資源受限的超大城市，曼谷如何將 ROSC 率從個位數提升至世界級標準？"
+                                icon="map-pin"
+                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <DetailCard title="二元化救援系統 (The Siriraj Model)">
+                                    <p>曼谷的急救成功建立在 **醫院端 (ALS)** 與 **志願者端 (BLS)** 的完美融合。Siriraj 醫院不僅是醫療中心，更是區域急救品質的控制大腦 (CQI Center)。</p>
+                                    <ul className="space-y-4 list-disc list-inside">
+                                        <li>**基金會志願者 (Foundation)**：具備地緣優勢，負責最初 5 分鐘的 BLS。</li>
+                                        <li>**醫院專業隊 (Hospital Team)**：負責進階氣道與藥物，並監督品質。</li>
+                                    </ul>
+                                </DetailCard>
+                                <div className="space-y-8">
+                                    <DataPoint label="Siriraj Response Time" value="< 8" unit="min" description="透過機車醫護小組 (Motor-Lance) 克服曼谷塞車障礙。" />
+                                    <DataPoint label="Bystander CPR Rate" value="> 45" unit="%" description="大規模社區訓練與電話指導 CPR (DA-CPR) 的成果。" />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 2. Physiology Deep Dive */}
+                        <section id="hp-cpr-physics" className="section-padding">
+                            <SectionHeader 
+                                title="02. HP-CPR 生理物理學：深度的科學" 
+                                subtitle="按壓不只是「壓下去」，更是一個動態的流體力學過程。了解 CPP 是成功的關鍵。"
+                                icon="zap"
+                            />
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                <div className="lg:col-span-2 space-y-12">
+                                    <DetailCard title="冠狀動脈灌流壓 (CPP) 的累積性" highlight>
+                                        <p>冠狀動脈的血流發生在 **舒張期 (Diastole)**。每一次按壓都在累積壓力。如果中斷按壓超過 10 秒，CPP 會瞬間歸零，且需連續按壓 **15-20 次** 才能重新回到維持大腦存活的壓力水平。</p>
+                                        <div className="p-8 bg-slate-900 rounded-3xl mt-6">
+                                            <h4 className="text-blue-400 font-bold mb-4 italic">「中斷按壓就是中斷生命。」</h4>
+                                            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-blue-600 w-full animate-pulse"></div>
+                                            </div>
+                                        </div>
+                                    </DetailCard>
+                                    <DetailCard title="回彈 (Recoil) 的負壓生理">
+                                        <p>按壓後的完全釋放會在胸腔內產生 **「負壓」**。這個負壓像抽水機一樣，將靜脈血液拉回心臟。如果按壓者「靠」在胸壁上 (Leaning)，負壓就會消失，心臟將處於排空狀態，下一次按壓將完全無效。</p>
+                                    </DetailCard>
+                                </div>
+                                <div className="space-y-8">
+                                    <div className="p-8 bg-blue-600 rounded-[3rem] text-white">
+                                        <h4 className="text-2xl font-black mb-6 uppercase">按壓物理黃金指標</h4>
+                                        <div className="space-y-6">
+                                            <div className="border-b border-blue-500 pb-4">
+                                                <div className="text-blue-200 text-xs font-bold mb-1">DEPTH</div>
+                                                <div className="text-3xl font-black italic">51 - 60 mm</div>
+                                            </div>
+                                            <div className="border-b border-blue-500 pb-4">
+                                                <div className="text-blue-200 text-xs font-bold mb-1">RATE</div>
+                                                <div className="text-3xl font-black italic">103 - 118 bpm</div>
+                                            </div>
+                                            <div className="pb-4">
+                                                <div className="text-blue-200 text-xs font-bold mb-1">RECOIL</div>
+                                                <div className="text-3xl font-black italic">100% Release</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 3. Pit Crew */}
+                        <section id="pit-crew-protocol" className="section-padding bg-slate-900 rounded-[5rem] px-20 text-white my-20">
+                            <SectionHeader title="03. Pit Crew 團隊分工協議" subtitle="模仿 F1 賽車維修小組的模組化動態，將混亂的現場轉化為有序的戰場。" icon="users" dark />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                                <div className="space-y-6">
+                                    <div className="text-7xl font-black text-white/10">01</div>
+                                    <h4 className="text-2xl font-bold text-blue-400">Position 1: 按壓手</h4>
+                                    <p className="text-slate-400">位於病人右側心臟正上方。唯一的任務是維持最高品質的按壓。每 2 分鐘（或出現疲勞跡象前）無縫更換。</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="text-7xl font-black text-white/10">02</div>
+                                    <h4 className="text-2xl font-bold text-blue-400">Position 2: 氣道手</h4>
+                                    <p className="text-slate-400">位於頭部。負責 BVM、氣道輔助器及監控 EtCO2 波形。在 HP-CPR 模式下，氣道手必須避免過度通氣。</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="text-7xl font-black text-white/10">03</div>
+                                    <h4 className="text-2xl font-bold text-blue-400">Position 3: 指揮/去顫</h4>
+                                    <p className="text-slate-400">位於病人左側。操作去顫器、觀察生理監測儀、控制換手節奏。是團隊的靈魂與大腦。</p>
+                                </div>
+                                <div className="lg:col-span-3 mt-12 p-10 bg-white/5 rounded-3xl border border-white/10">
+                                    <h5 className="text-xl font-bold mb-6 flex items-center gap-3"><Icon name="clock" className="text-red-500" /> 戰術細節：150 秒原則</h5>
+                                    <p className="text-slate-400">在循環第 1 分 50 秒時，指揮手發出口令：**「準備充電」**。充電完成後，在 2 分鐘到達瞬間檢查脈搏，總中斷時間不應超過 3 秒。如果需要電擊，在按下電擊鈕後立刻恢復按壓。</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 4. CQI Video */}
+                        <section id="cqi-video" className="section-padding">
+                            <SectionHeader title="04. 品質改善 (CQI)：密錄器的力量" subtitle="曼谷 Siriraj 醫院成功的秘密武器：影像回饋制度。" icon="video" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                                <div className="bg-white p-12 rounded-[3rem] shadow-xl border border-slate-100">
+                                    <h4 className="text-2xl font-bold mb-8">數據不說謊 (The debriefing)</h4>
+                                    <p className="text-lg text-slate-600 mb-8 leading-loose">每一次 OHCA 個案，其監視器數據與現場密錄器影像都會被帶回中心。專家團隊會針對以下指標進行「無責回顧」：</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-6 bg-slate-50 rounded-2xl"><div className="text-xs text-slate-400 mb-1">CCF</div><div className="text-2xl font-black text-blue-600">> 92%</div></div>
+                                        <div className="p-6 bg-slate-50 rounded-2xl"><div className="text-xs text-slate-400 mb-1">Pre-Shock Pause</div><div className="text-2xl font-black text-red-600">< 2s</div></div>
+                                        <div className="p-6 bg-slate-50 rounded-2xl"><div className="text-xs text-slate-400 mb-1">EtCO2 Trend</div><div className="text-2xl font-black text-green-600">Stable</div></div>
+                                        <div className="p-6 bg-slate-50 rounded-2xl"><div className="text-xs text-slate-400 mb-1">Recoil Accuracy</div><div className="text-2xl font-black text-amber-600">99%</div></div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                    <h4 className="text-3xl font-black mb-8">文化轉型：從責備到卓越</h4>
+                                    <p className="text-xl text-slate-500 leading-relaxed italic">「我們不是在找誰做錯了，我們是在找系統在哪裡可以更完美。」</p>
+                                    <div className="mt-12 space-y-6">
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-2 bg-green-100 text-green-600 rounded-lg"><Icon name="check" /></div>
+                                            <div><h5 className="font-bold">正向激勵機制</h5><p className="text-slate-500">達成 CCF 90% 以上的團隊獲頒「金手獎」。</p></div>
+                                        </div>
+                                        <div className="flex items-start gap-4">
+                                            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Icon name="users" /></div>
+                                            <div><h5 className="font-bold">同儕教練制</h5><p className="text-slate-500">資深救護員協助新手解讀生理波形，加速成長。</p></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 5. Ventilation */}
+                        <section id="ventilation" className="section-padding bg-blue-50 rounded-[5rem] px-20">
+                            <SectionHeader title="05. 通氣技術：被忽略的隱形殺手" subtitle="過度通氣 (Hyperventilation) 是現場最常見的錯誤，它會殺死病人。" icon="wind" />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                                <div className="space-y-10">
+                                    <p className="text-xl text-slate-600 leading-relaxed">當我們吹入過多氣體時，胸腔內壓 (Intrathoracic Pressure) 會升高，壓迫靜脈回流，導致下一次按壓時心臟完全沒血可排。2025 年的建議更趨於保守與精確。</p>
+                                    <div className="p-10 bg-white rounded-3xl shadow-lg border-l-8 border-blue-500">
+                                        <h4 className="text-2xl font-black mb-6">SGA vs ETI</h4>
+                                        <p className="text-slate-600">目前的科學證據傾向於在現場優先使用 **聲門上氣道 (SGA)**。它插入迅速、不干擾按壓，且產生的正壓損傷較小。插管 (ETI) 應保留給複雜案例或在穩定環境下執行。</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="bg-slate-900 p-8 rounded-3xl text-white">
+                                        <h5 className="text-blue-400 font-bold mb-4 uppercase">BVM Technique</h5>
+                                        <p className="text-sm text-slate-400 mb-6 font-bold tracking-widest">Rate: 10 breath/min</p>
+                                        <p className="text-slate-500 text-xs">每 6 秒一次，僅需單手擠壓球體 1/3，看到胸部起伏即可。</p>
+                                    </div>
+                                    <div className="bg-slate-900 p-8 rounded-3xl text-white">
+                                        <h5 className="text-green-400 font-bold mb-4 uppercase">EtCO2 Waveform</h5>
+                                        <p className="text-sm text-slate-400 mb-6 font-bold tracking-widest">Target: > 20 mmHg</p>
+                                        <p className="text-slate-500 text-xs">若數值突然上升至 35-40，強烈預示 ROSC 發生。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 6. AHA 2025 Core */}
+                        <section id="aha-2025-main" className="section-padding">
+                            <SectionHeader title="06. 2025 AHA Guidelines 更新核心" subtitle="每五年一次的科學權威更新，今年主軸：全生命週期、數位融合、精準醫療。" icon="shield" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                                <DetailCard title="波形 EtCO2 強制化" icon="activity">
+                                    <p className="text-sm">2025 定位：ALS 標準配備。不可僅依賴聽診或單次變色二氧化碳計。</p>
+                                </DetailCard>
+                                <DetailCard title="雙重序列去顫 (DSD)" icon="zap">
+                                    <p className="text-sm">針對頑固性 VF，正式建議由受訓團隊執行兩台儀器的向量變換或序列電擊。</p>
+                                </DetailCard>
+                                <DetailCard title="IV vs IO 爭議定位" icon="layers">
+                                    <p className="text-sm">成人現場：IV 優先於 IO。但若 2 次嘗試失敗，立即切換為 IO 以確保藥物給予。</p>
+                                </DetailCard>
+                                <DetailCard title="康復第六環確立" icon="refresh-cw">
+                                    <p className="text-sm">生存之鏈正式延伸至出院後。包含心理健康、認知評估與神經復健。</p>
+                                </DetailCard>
+                            </div>
+                        </section>
+
+                        {/* 7. Pharmacology */}
+                        <section id="pharmacology" className="section-padding bg-slate-100 rounded-[5rem] px-20">
+                            <SectionHeader title="07. 藥物與給藥路徑" subtitle="劑量不變，但給藥時機與路徑的選擇變得更為講究。" icon="thermometer" />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                <div className="space-y-8">
+                                    <div className="p-10 bg-white rounded-3xl border border-blue-200">
+                                        <h4 className="text-xl font-bold mb-4 text-blue-800">Epinephrine (腎上腺素)</h4>
+                                        <p className="text-slate-600 mb-4 font-bold tracking-wide">1mg (1:10,000) every 3-5 mins</p>
+                                        <p className="text-sm text-slate-500 leading-relaxed italic">最新研究：對於 Non-Shockable (PEA/Asystole)，越早給予 Epi，神經學預後越佳。對於 Shockable，應在第二次電擊後給予。</p>
+                                    </div>
+                                    <div className="p-10 bg-white rounded-3xl border border-red-200">
+                                        <h4 className="text-xl font-bold mb-4 text-red-800">Amiodarone vs Lidocaine</h4>
+                                        <p className="text-slate-600">對於電擊無效的 VF/pVT，兩者地位平等。Amiodarone 首劑 300mg；Lidocaine 首劑 1-1.5 mg/kg。</p>
+                                    </div>
+                                </div>
+                                <div className="bg-slate-900 p-12 rounded-[3rem] text-white">
+                                    <h4 className="text-2xl font-bold mb-8">IV/IO 精準技術</h4>
+                                    <ul className="space-y-6 text-sm text-slate-400">
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 font-bold text-white">1</div>
+                                            <p>給藥後必須接 **20ml 生理鹽水推注** 並抬高肢體 10-20 秒。</p>
+                                        </li>
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 font-bold text-white">2</div>
+                                            <p>IO 針頭：成人肱骨 (Humeral) 的流速與藥效優於脛骨 (Tibial)。</p>
+                                        </li>
+                                        <li className="flex gap-4">
+                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0 font-bold text-white">3</div>
+                                            <p>所有藥物應在按壓循環中給予，絕不可為了給藥中斷按壓。</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 8. PALS & Neonatal */}
+                        <section id="pals-neo" className="section-padding">
+                            <SectionHeader title="08. 小兒與新生兒復甦" subtitle="兒童不是成人的縮小版，通氣與比例是成功的核心。" icon="baby" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <div className="p-12 bg-pink-50 rounded-[3rem] border border-pink-100">
+                                    <h4 className="text-2xl font-bold text-pink-800 mb-8 underline decoration-pink-300">PALS 小兒核心</h4>
+                                    <ul className="space-y-6">
+                                        <li className="flex justify-between border-b border-pink-200 pb-2 font-bold"><span>按壓比例 (雙人)</span> <span>15 : 2</span></li>
+                                        <li className="flex justify-between border-b border-pink-200 pb-2 font-bold"><span>通氣頻率 (插管後)</span> <span>20 - 30 次/分</span></li>
+                                        <li className="flex justify-between border-b border-pink-200 pb-2 font-bold"><span>電擊能量 (首擊)</span> <span>2 J / kg</span></li>
+                                        <li className="flex justify-between border-b border-pink-200 pb-2 font-bold"><span>按壓深度</span> <span>胸廓 1/3 (約 4-5cm)</span></li>
+                                    </ul>
+                                </div>
+                                <div className="p-12 bg-blue-50 rounded-[3rem] border border-blue-100">
+                                    <h4 className="text-2xl font-bold text-blue-800 mb-8 underline decoration-blue-300">NRP 新生兒產房復甦</h4>
+                                    <p className="text-slate-600 mb-6 font-bold italic underline">「溫暖、乾燥、刺激」之後的第一步是通氣。</p>
+                                    <div className="space-y-4 text-sm text-slate-500">
+                                        <p>● 優先建議使用 **T-Piece 復甦器** 取代甦醒球，以提供穩定的 PEEP。</p>
+                                        <p>● 胸外按壓時機：心率 &lt; 60 bpm 且有效通氣 30 秒後。</p>
+                                        <p>● 按壓比例：**3 : 1** (90 次按壓 + 30 次通氣 / 分鐘)。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 9. E-CPR */}
+                        <section id="ecpr-ecmo" className="section-padding bg-slate-950 rounded-[5rem] text-white px-20">
+                            <SectionHeader title="09. E-CPR 與 ECMO：最後的防線" subtitle="當傳統 CPR 失敗時，葉克膜如何重啟循環？" icon="bolt" dark />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                                <div className="flex flex-col justify-center">
+                                    <h4 className="text-3xl font-black mb-8 text-blue-500">誰適合 E-CPR？ (Patient Selection)</h4>
+                                    <p className="text-lg text-slate-400 leading-relaxed mb-8">不是所有人。精確篩選是為了把資源留給最有希望的人：</p>
+                                    <ul className="space-y-4 text-sm font-bold text-slate-300">
+                                        <li>● 年齡 &lt; 70 歲，且過往身體機能優良。</li>
+                                        <li>● 目擊倒地且由旁觀者施予 CPR。</li>
+                                        <li>● 低溫 OHCA 或疑似急性心肌梗塞。</li>
+                                        <li>● 到達醫院時 CPR 時間 &lt; 60 分鐘。</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-white/5 p-12 rounded-3xl border border-white/10">
+                                    <h5 className="text-2xl font-black mb-6">現場配置：ECMO-on-Wheels</h5>
+                                    <p className="text-slate-400 mb-8">曼谷 Siriraj 正試驗將 ECMO 團隊部署至救護車。這種戰術要求團隊在 15 分鐘內完成動靜脈置管，極具挑戰性但效果顯著。</p>
+                                    <div className="h-40 bg-gradient-to-r from-red-600 to-blue-600 rounded-2xl flex items-center justify-center font-black text-4xl italic opacity-50">
+                                        ECMO ACTIVE
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 10. TTM & Brain Protection */}
+                        <section id="ttm-brain" className="section-padding">
+                            <SectionHeader title="10. 腦保護與目標體溫管理 (TTM)" subtitle="ROSC 不是終點，只是保護大腦戰爭的開始。" icon="brain" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <DetailCard title="溫控策略的轉向">
+                                    <p>不再盲目追求 33°C。最新建議：**「防止發燒」**比「強迫低溫」更重要。核心溫度應嚴格控制在 32°C - 37.5°C 之間，並持續至少 72 小時。</p>
+                                </DetailCard>
+                                <DetailCard title="神經學預後評估 (P-P-P)">
+                                    <p>絕不應過早宣告死亡。神經學評估必須在復溫後 (Re-warming) 至少 72 小時後進行。結合 EEG、SSEP 與 NSE 標記物。</p>
+                                </DetailCard>
+                            </div>
+                        </section>
+
+                        {/* 11. Rehab Cycle */}
+                        <section id="rehab-cycle" className="section-padding border-t border-slate-200">
+                            <SectionHeader title="11. 生存之鏈第六環：康復與重建" subtitle="活下來不代表康復。生存者面臨的心理與認知障礙是急救界的下一個難題。" icon="smile" />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                                <div className="p-8 bg-white shadow-lg rounded-3xl"><h5 className="font-black text-blue-600 mb-4 text-2xl">Cognitive</h5><p className="text-sm text-slate-500 font-bold">記憶力、注意力的系統性復健訓練。</p></div>
+                                <div className="p-8 bg-white shadow-lg rounded-3xl"><h5 className="font-black text-red-600 mb-4 text-2xl">Emotional</h5><p className="text-sm text-slate-500 font-bold">解決 PTSD、焦慮與憂鬱，包含家屬支持。</p></div>
+                                <div className="p-8 bg-white shadow-lg rounded-3xl"><h5 className="font-black text-green-600 mb-4 text-2xl">Social</h5><p className="text-sm text-slate-500 font-bold">職能評估，協助生存者重新回歸社會與職場。</p></div>
+                            </div>
+                        </section>
+
+                        {/* 12. Ethics */}
+                        <section id="ethics-death" className="section-padding bg-slate-50 rounded-[5rem] px-20">
+                            <SectionHeader title="12. 倫理與終止規則 (TOR)" subtitle="勇氣不僅是開始，也包含在適當時機優雅地結束。" icon="book-open" />
+                            <div className="max-w-4xl mx-auto space-y-12">
+                                <div className="p-10 bg-white rounded-[3rem] shadow-xl border-t-8 border-slate-900">
+                                    <h4 className="text-2xl font-black mb-8">什麼時候停止？ (Stop Rules)</h4>
+                                    <div className="space-y-6 text-lg text-slate-600">
+                                        <p>● **無人目擊** 且 **無 Bystander CPR**。</p>
+                                        <p>● 經專業救護員執行高品質 CPR 超過 **30 分鐘** 仍為無電擊心律且 EtCO2 &lt; 10 mmHg。</p>
+                                        <p>● 現場環境極度危險，且病患搬運會造成二次災難。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 13. Digital AI */}
+                        <section id="digital-ai" className="section-padding">
+                            <SectionHeader title="13. 數位未來：AI 與 智能追蹤" subtitle="科技如何介入，讓人類做不到的「精準」變成可能？" icon="cpu" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <DetailCard title="AI-assisted Dispatch">
+                                    <p>AI 透過視訊畫面或報案者語音，自動分析病患呼吸模式 (Agonal Breathing)，提前 3 分鐘辨識心跳停止。</p>
+                                </DetailCard>
+                                <DetailCard title="Smart Defibrillators">
+                                    <p>去顫器即時分析阻抗，自動調整電流脈衝與頻率，並在按壓時透過語音動態導航操作者。</p>
+                                </DetailCard>
+                            </div>
+                        </section>
+
+                        {/* 14. Training */}
+                        <section id="training" className="section-padding bg-blue-900 text-white rounded-[5rem] px-20">
+                            <SectionHeader title="14. 模擬訓練 (Simulation-based Training)" subtitle="「戰鬥即是演習」。高仿真模型與壓力測試是成功的基石。" icon="monitor" dark />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                                <p className="text-xl text-blue-200 leading-relaxed">Siriraj 中心使用高保真假人 (Laerdal SimMan) 進行「極限測試」。這不只是學技術，更是學團隊在混亂中的**有效溝通 (Closed-loop communication)**。</p>
+                                <div className="p-8 bg-white/10 rounded-3xl"><h5 className="font-bold mb-4">訓練亮點</h5><p className="text-sm text-slate-400">● 語音錄製分析：檢討團隊中的廢話比例。 ● 隨機干擾注入：模擬家屬尖叫、現場火警等壓力環境。</p></div>
+                            </div>
+                        </section>
+
+                        {/* 15. Summary */}
+                        <section id="summary" className="section-padding text-center">
+                            <Icon name="check-circle" className="w-20 h-20 text-green-500 mx-auto mb-10" />
+                            <h2 className="text-6xl font-black mb-12">15. 結論：生命不息</h2>
+                            <p className="text-2xl text-slate-500 max-w-4xl mx-auto leading-loose mb-20">
+                                HP-CPR 的精髓在於 **「追求極限品質」** 的謙遜態度。2025 年的指南向我們展示了科技與科學如何攜手前行，但最終，那雙按在胸腔上的手，才是奇蹟的來源。
+                            </p>
+                            <div className="p-10 bg-slate-900 rounded-[3rem] text-white max-w-2xl mx-auto">
+                                <p className="text-xs uppercase tracking-[0.5em] font-bold text-slate-500 mb-4">Final Message from Siriraj Team</p>
+                                <h4 className="text-2xl font-black italic">"Every heart beat matters."</h4>
+                            </div>
+                        </section>
+
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-slate-950 py-32 border-t border-white/5">
+                        <div className="max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-2 gap-20">
+                            <div>
+                                <div className="flex items-center gap-3 mb-10 text-white">
+                                    <div className="bg-red-600 p-2 rounded-xl"><Icon name="heart" className="w-6 h-6" /></div>
+                                    <span className="text-2xl font-black tracking-tighter uppercase">HP-CPR GLOBAL RESOURCE</span>
+                                </div>
+                                <p className="text-slate-500 max-w-md leading-loose text-sm">
+                                    本平台資訊整合自 Siriraj 醫院急診部 Dr. Satha 講座與 2025 年最新國際 AHA 復甦指南。本網頁採用單頁式架構設計，專為醫療人員提供最深度的學術資源。
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-10">
+                                <div>
+                                    <h5 className="text-white font-black mb-8 text-lg">快速導航</h5>
+                                    <ul className="space-y-4 text-sm text-slate-500 font-bold">
+                                        <li><button onClick={()=>scrollTo('ems-bangkok')} className="hover:text-blue-500">曼谷成功經驗</button></li>
+                                        <li><button onClick={()=>scrollTo('hp-cpr-physics')} className="hover:text-blue-500">生理學深度</button></li>
+                                        <li><button onClick={()=>scrollTo('aha-2025-main')} className="hover:text-blue-500">2025 指南更新</button></li>
+                                        <li><button onClick={()=>scrollTo('ecpr-ecmo')} className="hover:text-blue-500">ECMO 進階技術</button></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 className="text-white font-black mb-8 text-lg">免責聲明</h5>
+                                    <p className="text-xs text-slate-600 leading-relaxed font-medium">本內容僅供教學研究參考，實際臨床行為請務必遵循當地醫療法規與所屬單位之 SOP。醫療決策應由合格醫師執行。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="max-w-7xl mx-auto px-10 mt-32 pt-10 border-t border-white/5 text-center">
+                            <p className="text-slate-700 text-[10px] uppercase tracking-[1em] font-black">© 2025 HP-CPR Encyclopedia. All Rights Reserved.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
