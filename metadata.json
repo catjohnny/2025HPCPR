@@ -1,0 +1,7 @@
+{
+  "name": "Bangkok HP-CPR & AHA 2025 Comprehensive Guide",
+  "description": "An extensive one-page resource detailing the implementation of High-Performance CPR in Bangkok and the 2025 AHA Guidelines update.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
